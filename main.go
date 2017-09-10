@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/brahama/cf-docs/doc"
-	"github.com/brahama/cf-docs/print"
+	"github.com/brahama/cf-doc/doc"
+	"github.com/brahama/cf-doc/print"
 	"github.com/hashicorp/hcl"
 	"github.com/hashicorp/hcl/hcl/ast"
 	"github.com/tj/docopt"
