@@ -1,0 +1,113 @@
+#
+#  Template usage:
+# 
+#       This template depends on the LC template and also the VPC stack.
+# 
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Cloudformation Template for AutoScalingGroups (ASG)'
+
+Parameters:
+  pLaunchConfigurationName:
+    Type: String
+    Description: Launch configuration name
+  pVPCZoneIdentifier:
+    Type: CommaDelimitedList
+    Description: Subnets List of VPC
+  pCooldown:
+    Type: String
+    Description: Cooldown
+    Default: '300'
+  pHealthCheckGracePeriod:
+    Type: String
+    Description: Health check grace period
+    Default: '900'
+  pHealthCheckType:
+    Type: String
+    Description: Health check type
+    Default: 'EC2'
+  pLoadBalancerNames:
+    Type: CommaDelimitedList
+    Description: A list of Classic load balancers associated with this Auto Scaling group.
+    Default: ''
+  pMinSize:
+    Type: String
+    Description: Mininum size for Autoscaling.
+    Default: '1'
+  pMaxSize:
+    Type: String
+    Description: Maximum size for Autoscaling.
+    Default: '1'
+  pDesiredCapacity:
+    Type: String
+    Description: Desired capacity size for Autoscaling.
+    Default: '1'
+  pPuppetPrefix:
+    Type: String
+    Description: Prefix for instances name
+    Default: 'prd'
+  pPuppetEnv:
+    Type: String
+    Description: Environment for Puppet Master
+    Default: 'prd'
+  pPuppetRole:
+    Type: String
+    Description: Role for Puppet Master
+    Default: 'puppetmaster'
+  pTerminationPolicy:
+    Type: CommaDelimitedList
+    Description: Termination policy
+    Default: 'Default'
+  pIgnoreUnmodifiedGroupSizeProperties:
+    Type: String
+    Description: 'Ignores differences in group size properties between your current Auto Scaling group and the Auto Scaling group described in CF.'
+    Default: true
+    AllowedValues: [true, false]
+
+Conditions:
+  LoadBalancerNamesNull: !Equals 
+    - !Join
+      - ''
+      - !Ref pLoadBalancerNames
+    - ''
+
+Resources:
+  asg:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref 'pLaunchConfigurationName'
+      VPCZoneIdentifier: !Ref 'pVPCZoneIdentifier'
+      Cooldown: !Ref 'pCooldown'
+      MinSize: !Ref 'pMinSize'
+      MaxSize: !Ref 'pMaxSize'
+      DesiredCapacity: !Ref 'pDesiredCapacity'
+      HealthCheckGracePeriod: !Ref 'pHealthCheckGracePeriod'
+      HealthCheckType: !Ref 'pHealthCheckType'
+      LoadBalancerNames: !If 
+        - LoadBalancerNamesNull
+        - !Ref 'AWS::NoValue'
+        - !Ref 'pLoadBalancerNames'
+      Tags:
+      - Key: Name
+        Value: ''
+        PropagateAtLaunch: true
+      - Key: prefix
+        Value: !Ref 'pPuppetPrefix'
+        PropagateAtLaunch: true
+      - Key: puppet_env
+        Value: !Ref 'pPuppetEnv'
+        PropagateAtLaunch: true
+      - Key: puppet_role
+        Value: !Ref 'pPuppetRole'
+        PropagateAtLaunch: true
+      TerminationPolicies: !Ref 'pTerminationPolicy'
+    UpdatePolicy:
+      AutoScalingScheduledAction:
+        IgnoreUnmodifiedGroupSizeProperties: !Ref 'pIgnoreUnmodifiedGroupSizeProperties'
+
+Outputs:
+  asgid:
+    Description: AsgBase Logical ID
+    Value: !Ref 'asg'
+    Export:
+      Name: !Sub "${AWS::StackName}-asgid"
