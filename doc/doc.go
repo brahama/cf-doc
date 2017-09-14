@@ -8,7 +8,6 @@ package doc
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -75,7 +74,7 @@ func getUsage(cfTemplate *[]byte) {
 }
 
 // Create creates a Doc type with the contents of the Template
-func Create(cfTemplate []byte) { //*Doc {
+func Create(cfTemplate []byte) *Doc {
 	cfParam := yamlParameters{}
 	cfOut := yamlOutputs{}
 	cfDescription := yamlDescription{}
@@ -122,5 +121,5 @@ func Create(cfTemplate []byte) { //*Doc {
 		cfDoc.Outputs[i].Export = cfOut.Outputs[k].Export.Name
 	}
 
-	fmt.Printf("%+v", cfDoc)
+	return &cfDoc
 }

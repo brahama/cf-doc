@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/brahama/cf-doc/doc"
+	"github.com/brahama/cf-doc/print"
 	"github.com/tj/docopt"
 )
 
@@ -71,25 +72,24 @@ func main() {
 	}
 
 	content, err := ioutil.ReadFile("_example/asg.yaml")
-	doc.Create(content)
+	doc := doc.Create(content)
 
-	//fmt.Printf("%+v", doc)
-	//var out string
-	//
-	//switch {
+	var out string
+
+	switch {
 	//case args["markdown"].(bool):
-	//	out, err = print.Markdown(doc, printRequired)
+	//	out, err = print.Markdown(doc)
 	//case args["md"].(bool):
-	//	out, err = print.Markdown(doc, printRequired)
+	//	out, err = print.Markdown(doc)
 	//case args["json"].(bool):
 	//	out, err = print.JSON(doc)
-	//default:
-	//	out, err = print.Pretty(doc)
-	//}
-	//
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//fmt.Println(out)
+	default:
+		out, err = print.Pretty(doc)
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(out)
 }
