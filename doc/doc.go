@@ -1,266 +1,126 @@
+/*
+* Here we should parse/return all the Description, Usage; Parameters and Outputs!
+*
+ */
+
 package doc
 
 import (
-	"path"
-	"sort"
-	"strconv"
+	"bufio"
+	"bytes"
+	"fmt"
 	"strings"
 
-	"github.com/hashicorp/hcl/hcl/ast"
+	"gopkg.in/yaml.v2"
 )
 
-// Input represents a terraform input variable.
-type Input struct {
-	Name        string
-	Description string
-	Default     *Value
-	Type        string
+// Doc represents the CF template Documentation
+type Doc struct {
+	Usage      string
+	Parameters []Parameter
+	Outputs    []Output
 }
 
-// Value returns the default value as a string.
-func (i *Input) Value() string {
-	if i.Default != nil {
-		switch i.Default.Type {
-		case "string":
-			return i.Default.Literal
-		case "map":
-			return "<map>"
-		case "list":
-			return "<list>"
-		}
-	}
-
-	return "required"
+// Parameter represents CF Parameter block
+type Parameter struct {
+	Name          string
+	Description   string
+	Default       string
+	Type          string
+	AllowedValues string
 }
 
-// Value represents a terraform value.
-type Value struct {
-	Type    string
-	Literal string
-}
-
-// Output represents a terraform output.
+// Output represents the CF Outputs block
 type Output struct {
 	Name        string
 	Description string
+	Export      string
 }
 
-// Doc represents a terraform module doc.
-type Doc struct {
-	Comment string
-	Inputs  []Input
-	Outputs []Output
+// We need to parse the yaml from the template file
+// **************************************************
+type yamlParam struct {
+	Type          string `yaml:"Type"`
+	Description   string `yaml:"Description"`
+	AllowedValues string `yaml:"AllowedValues"`
+	Default       string `yaml:"Default"`
+}
+type yamlParameters struct {
+	Parameters map[string]yamlParam `yaml:"Parameters"`
 }
 
-type inputsByName []Input
-
-func (a inputsByName) Len() int           { return len(a) }
-func (a inputsByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a inputsByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
-
-type outputsByName []Output
-
-func (a outputsByName) Len() int           { return len(a) }
-func (a outputsByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a outputsByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
-
-// Create creates a new *Doc from the supplied map
-// of filenames and *ast.File.
-func Create(files map[string]*ast.File) *Doc {
-	doc := new(Doc)
-
-	for name, f := range files {
-		list := f.Node.(*ast.ObjectList)
-		doc.Inputs = append(doc.Inputs, inputs(list)...)
-		doc.Outputs = append(doc.Outputs, outputs(list)...)
-
-		filename := path.Base(name)
-		comments := f.Comments
-
-		if filename == "main.tf" && len(comments) > 0 {
-			doc.Comment = header(comments[0])
-		}
-	}
-	sort.Sort(inputsByName(doc.Inputs))
-	sort.Sort(outputsByName(doc.Outputs))
-	return doc
+// Here we take Description general
+type yamlDescription struct {
+	Description string `yaml:"Description"`
 }
 
-// Inputs returns all variables from `list`.
-func inputs(list *ast.ObjectList) []Input {
-	var ret []Input
+// Here we take Outputs
+type yamlOut struct {
+	Description string `yaml:"Description"`
+	Export      struct {
+		Name string `yaml:"Name"`
+	} `yaml:"Export"`
+}
+type yamlOutputs struct {
+	Outputs map[string]yamlOut `yaml:"Outputs"`
+}
 
-	for _, item := range list.Items {
-		if is(item, "variable") {
-			name, _ := strconv.Unquote(item.Keys[1].Token.Text)
-			if name == "" {
-				name = item.Keys[1].Token.Text
-			}
-			items := item.Val.(*ast.ObjectType).List.Items
-			var desc string
-			switch {
-			case description(items) != "":
-				desc = description(items)
-			case item.LeadComment != nil:
-				desc = comment(item.LeadComment.List)
-			}
+// Lets parse first lines of comments. This is more of a convention
+// than anything else.
+func getUsage(cfTemplate *[]byte) {
+	// The idea was to make the usage here, but dunno how to handle
+	// byte type as string without bufio and as it only accepts byte
+	// and not pointer, i will do it in same function to avoid copying
+	// data. Perhaps later we found a way
+}
 
-			var itemsType = get(items, "type")
-			var itemType string
+// Create creates a Doc type with the contents of the Template
+func Create(cfTemplate []byte) { //*Doc {
+	cfParam := yamlParameters{}
+	cfOut := yamlOutputs{}
+	cfDescription := yamlDescription{}
 
-			if itemsType == nil || itemsType.Literal == "" {
-				itemType = "string"
-			} else {
-				itemType = itemsType.Literal
-			}
+	cfDoc := Doc{}
 
-			def := get(items, "default")
-			ret = append(ret, Input{
-				Name:        name,
-				Description: desc,
-				Default:     def,
-				Type:        itemType,
-			})
+	// Lets Parse Yaml Parameters and Outputs
+	yaml.Unmarshal(cfTemplate, &cfDescription)
+	yaml.Unmarshal(cfTemplate, &cfParam)
+	yaml.Unmarshal(cfTemplate, &cfOut)
+
+	//The first thing that should appear is the CF Description
+	cfDoc.Usage = cfDescription.Description + "\n"
+
+	// Now lets get Usage
+	// We transform bytes2Newreader to use bufio
+	scanner := bufio.NewScanner(bytes.NewReader(cfTemplate))
+	for scanner.Scan() {
+		if strings.HasPrefix(scanner.Text(), "#") {
+			cfDoc.Usage += scanner.Text()[1:] + "\n"
+		} else {
+			break
 		}
 	}
 
-	return ret
-}
-
-// Outputs returns all outputs from `list`.
-func outputs(list *ast.ObjectList) []Output {
-	var ret []Output
-
-	for _, item := range list.Items {
-		if is(item, "output") {
-			name, _ := strconv.Unquote(item.Keys[1].Token.Text)
-			if name == "" {
-				name = item.Keys[1].Token.Text
-			}
-			items := item.Val.(*ast.ObjectType).List.Items
-			var desc string
-			switch {
-			case item.LeadComment != nil:
-				desc = comment(item.LeadComment.List)
-			case description(items) != "":
-				desc = description(items)
-			}
-
-			ret = append(ret, Output{
-				Name:        name,
-				Description: desc,
-			})
-		}
+	// Now we create and fill the Doc Parameters
+	i := 0
+	for k := range cfParam.Parameters {
+		cfDoc.Parameters = append(cfDoc.Parameters, Parameter{})
+		cfDoc.Parameters[i].Name = k
+		cfDoc.Parameters[i].Type = cfParam.Parameters[k].Type
+		cfDoc.Parameters[i].Description = cfParam.Parameters[k].Description
+		cfDoc.Parameters[i].Default = cfParam.Parameters[k].Default
+		cfDoc.Parameters[i].AllowedValues = cfParam.Parameters[k].AllowedValues
+		i++
 	}
 
-	return ret
-}
-
-// Get `key` from the list of object `items`.
-func get(items []*ast.ObjectItem, key string) *Value {
-	for _, item := range items {
-		if is(item, key) {
-			v := new(Value)
-
-			if lit, ok := item.Val.(*ast.LiteralType); ok {
-				if value, ok := lit.Token.Value().(string); ok {
-					v.Literal = value
-				} else {
-					v.Literal = lit.Token.Text
-				}
-				v.Type = "string"
-				return v
-			}
-
-			if _, ok := item.Val.(*ast.ObjectType); ok {
-				v.Type = "map"
-				return v
-			}
-
-			if _, ok := item.Val.(*ast.ListType); ok {
-				v.Type = "list"
-				return v
-			}
-
-			return nil
-		}
+	// Create Doc Outputs
+	i = 0
+	for k := range cfOut.Outputs {
+		cfDoc.Outputs = append(cfDoc.Outputs, Output{})
+		cfDoc.Outputs[i].Name = k
+		cfDoc.Outputs[i].Description = cfOut.Outputs[k].Description
+		cfDoc.Outputs[i].Export = cfOut.Outputs[k].Export.Name
 	}
 
-	return nil
-}
-
-// description returns a description from items or an empty string.
-func description(items []*ast.ObjectItem) string {
-	if v := get(items, "description"); v != nil {
-		return v.Literal
-	}
-
-	return ""
-}
-
-// Is returns true if `item` is of `kind`.
-func is(item *ast.ObjectItem, kind string) bool {
-	if len(item.Keys) > 0 {
-		return item.Keys[0].Token.Text == kind
-	}
-
-	return false
-}
-
-// Unquote the given string.
-func unquote(s string) string {
-	s, _ = strconv.Unquote(s)
-	return s
-}
-
-// Comment cleans and returns a comment.
-func comment(l []*ast.Comment) string {
-	var line string
-	var ret string
-
-	for _, t := range l {
-		line = strings.TrimSpace(t.Text)
-		line = strings.TrimPrefix(line, "#")
-		line = strings.TrimPrefix(line, "//")
-		ret += strings.TrimSpace(line) + "\n"
-	}
-
-	return ret
-}
-
-// Header returns the header comment from the list
-// or an empty comment. The head comment must start
-// at line 1 and start with `/**`.
-func header(c *ast.CommentGroup) (comment string) {
-	if len(c.List) == 0 {
-		return comment
-	}
-
-	if c.Pos().Line != 1 {
-		return comment
-	}
-
-	cm := strings.TrimSpace(c.List[0].Text)
-
-	if strings.HasPrefix(cm, "/**") {
-		lines := strings.Split(cm, "\n")
-
-		if len(lines) < 2 {
-			return comment
-		}
-
-		lines = lines[1 : len(lines)-1]
-		for _, l := range lines {
-			l = strings.TrimSpace(l)
-			switch {
-			case strings.TrimPrefix(l, "* ") != l:
-				l = strings.TrimPrefix(l, "* ")
-			default:
-				l = strings.TrimPrefix(l, "*")
-			}
-			comment += l + "\n"
-		}
-	}
-
-	return comment
+	fmt.Printf("%+v", cfDoc)
 }

@@ -6,7 +6,7 @@
 
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS Cloudformation Template for AutoScalingGroups (ASG)'
-
+# Testing Parameters
 Parameters:
   pLaunchConfigurationName:
     Type: String

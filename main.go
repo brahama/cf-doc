@@ -8,9 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/brahama/cf-doc/doc"
-	"github.com/brahama/cf-doc/print"
-	"github.com/hashicorp/hcl"
-	"github.com/hashicorp/hcl/hcl/ast"
 	"github.com/tj/docopt"
 )
 
@@ -65,7 +62,7 @@ func main() {
 			continue
 		}
 
-		files, err := filepath.Glob(fmt.Sprintf("%s/*.tf", p))
+		files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", p))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -73,41 +70,26 @@ func main() {
 		names = append(names, files...)
 	}
 
-	files := make(map[string]*ast.File, len(names))
+	content, err := ioutil.ReadFile("_example/asg.yaml")
+	doc.Create(content)
 
-	for _, name := range names {
-		buf, err := ioutil.ReadFile(name)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		f, err := hcl.ParseBytes(buf)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		files[name] = f
-	}
-
-	doc := doc.Create(files)
-	printRequired := !args["--no-required"].(bool)
-
-	var out string
-
-	switch {
-	case args["markdown"].(bool):
-		out, err = print.Markdown(doc, printRequired)
-	case args["md"].(bool):
-		out, err = print.Markdown(doc, printRequired)
-	case args["json"].(bool):
-		out, err = print.JSON(doc)
-	default:
-		out, err = print.Pretty(doc)
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(out)
+	//fmt.Printf("%+v", doc)
+	//var out string
+	//
+	//switch {
+	//case args["markdown"].(bool):
+	//	out, err = print.Markdown(doc, printRequired)
+	//case args["md"].(bool):
+	//	out, err = print.Markdown(doc, printRequired)
+	//case args["json"].(bool):
+	//	out, err = print.JSON(doc)
+	//default:
+	//	out, err = print.Pretty(doc)
+	//}
+	//
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//fmt.Println(out)
 }
