@@ -12,7 +12,7 @@ import (
 	"github.com/tj/docopt"
 )
 
-var version = "v0.2.0"
+var version = "v0.1.0"
 
 const usage = `
   Usage:
@@ -77,10 +77,10 @@ func main() {
 	var out string
 
 	switch {
-	//case args["markdown"].(bool):
-	//	out, err = print.Markdown(doc)
-	//case args["md"].(bool):
-	//	out, err = print.Markdown(doc)
+	case args["markdown"].(bool):
+		out, err = print.Markdown(doc)
+	case args["md"].(bool):
+		out, err = print.Markdown(doc)
 	//case args["json"].(bool):
 	//	out, err = print.JSON(doc)
 	default:
