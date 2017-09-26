@@ -24,7 +24,7 @@
 ```bash
 
   Usage:
-    cf-docs [json | md | markdown] <path>...
+    cf-docs [json | md | markdown] <file>...
     cf-docs -h | --help
 
   Examples:
@@ -46,70 +46,80 @@
 
 ## Example
 
-Given a simple module at `./_example`:
+Given a simple template at `./_example/asg.yaml`:
 
-```tf
-/**
- * This module has a variable and an output.  This text here will be output before any inputs or outputs!
- */
+```yaml
+#
+#  Template usage:
+# 
+#       This template depends on the LC template and also the VPC stack.
+#       This is a NON working template. only for demonstration purposes for cf-doc
+#
 
-variable "subnet_ids" {
-  description = "a comma-separated list of subnet IDs"
-}
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Cloudformation Template for AutoScalingGroups (ASG)'
+# Testing Parameters
+Parameters:
+  pLaunchConfigurationName:
+    Type: String
+    Description: Launch configuration name
+  pVPCZoneIdentifier:
+    Type: CommaDelimitedList
+    Description: Subnets List of VPC
 
-// The VPC ID.
-output "vpc_id" {
-  value = "vpc-5c1f55fd"
-}
+
+Outputs:
+  asgid:
+    Description: AsgBase Logical ID
+    Value: !Ref 'asg'
+    Export:
+      Name: !Sub "${AWS::StackName}-asgid"
+
 
 ```
 
 To view docs:
 
 ```bash
-$ cf-docs _example
+$ cf-docs _example/asg.yaml
 ```
 
 To output JSON docs:
 
 ```bash
-$ cf-docs json _example
+$ cf-docs _example/asg.yaml
 {
-  "Comment": "This module has a variable and an output.  This text here will be output before any inputs or outputs!\n",
-  "Inputs": [
-    {
-      "Name": "subnet_ids",
-      "Description": "a comma-separated list of subnet IDs",
-      "Default": ""
-    }
-  ],
-  "Outputs": [
-    {
-      "Name": "vpc_id",
-      "Description": "The VPC ID.\n"
-    }
-  ]
+    "Usage": "AWS Cloudformation Template for AutoScalingGroups (ASG)\n\n  Template usage:\n \n       This template depends on the LC template and also the VPC stack.\n       This is a NON working template. only for demonstration purposes for cf-doc\n\n",
+    "Parameters": [
+        {
+            "Name": "pLaunchConfigurationName",
+            "Description": "Launch configuration name",
+            "Default": "",
+            "Type": "String",
+            "AllowedValues": ""
+        },
+        {
+            "Name": "pVPCZoneIdentifier",
+            "Description": "Subnets List of VPC",
+            "Default": "",
+            "Type": "CommaDelimitedList",
+            "AllowedValues": ""
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "asgid",
+            "Description": "AsgBase Logical ID",
+            "Export": "${AWS::StackName}-asgid"
+        }
+    ]
 }
 ```
 
 To output markdown docs:
 
 ```bash
-$ cf-docs md _example
-This module has a variable and an output.  This text here will be output before any inputs or outputs!
-
-
-## Inputs
-
-| Name | Description | Default | Required |
-|------|-------------|:-----:|:-----:|
-| subnet_ids | a comma-separated list of subnet IDs | - | yes |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| vpc_id | The VPC ID. |
+$ cf-docs md _example/asg.yaml
 
 ```
 
