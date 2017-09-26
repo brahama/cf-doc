@@ -10,23 +10,23 @@ import (
 	"github.com/brahama/cf-doc/print"
 )
 
-var version = "v0.1.0"
+var version = "v0.0.1"
 
 const usage = `
   Usage:
-    cf-docs [json | md | markdown] <file>...
-    cf-docs -h | --help
+    cf-doc [json | md | markdown] <file>...
+    cf-doc -h | --help
 
   Examples:
 
     # View inputs and outputs
-    $ cf-docs ./my-template.yaml
+    $ cf-doc ./my-template.yaml
 
     # Generate a JSON of inputs and outputs
-    $ cf-docs json ./my-template.yaml
+    $ cf-doc json ./my-template.yaml
 
     # Generate markdown tables of inputs and outputs
-    $ cf-docs md ./my-template.yaml
+    $ cf-doc md ./my-template.yaml
 
   Options:
     -h, --help     show help information
