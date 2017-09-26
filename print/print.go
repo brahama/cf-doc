@@ -39,6 +39,19 @@ func Markdown(d *doc.Doc) (string, error) {
 
 	}
 
+	if len(d.Outputs) > 0 {
+		buf.WriteString("\n## Outputs\n\n")
+		buf.WriteString("| Name | Description | Export |\n")
+		buf.WriteString("|------|-------------|--------|\n")
+
+		for k := range d.Outputs {
+			buf.WriteString(fmt.Sprintf("| %s | %s | %s |\n",
+				d.Outputs[k].Name,
+				d.Outputs[k].Description,
+				d.Outputs[k].Export))
+		}
+	}
+
 	return buf.String(), nil
 
 }
