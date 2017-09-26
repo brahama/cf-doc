@@ -5,39 +5,28 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/brahama/cf-doc/doc"
 	"github.com/brahama/cf-doc/print"
-	"github.com/tj/docopt"
 )
 
 var version = "v0.1.0"
 
 const usage = `
   Usage:
-    cf-docs [--no-required] [json | md | markdown] <path>...
+    cf-docs [json | md | markdown] <file>...
     cf-docs -h | --help
 
   Examples:
 
     # View inputs and outputs
-    $ cf-docs ./my-module
-
-    # View inputs and outputs for variables.tf and outputs.tf only
-    $ cf-docs variables.tf outputs.tf
+    $ cf-docs ./my-template.yaml
 
     # Generate a JSON of inputs and outputs
-    $ cf-docs json ./my-module
+    $ cf-docs json ./my-template.yaml
 
     # Generate markdown tables of inputs and outputs
-    $ cf-docs md ./my-module
-
-    # Generate markdown tables of inputs and outputs, but don't print "Required" column
-    $ cf-docs --no-required md ./my-module
-
-    # Generate markdown tables of inputs and outputs for the given module and ../config.tf
-    $ cf-docs md ./my-module ../config.tf
+    $ cf-docs md ./my-template.yaml
 
   Options:
     -h, --help     show help information
@@ -45,44 +34,33 @@ const usage = `
 `
 
 func main() {
-	args, err := docopt.Parse(usage, nil, true, version, true)
+
+	// Lets change how args are parsed to use flags.
+	args := os.Args
+	if len(args) <= 2 {
+		log.Fatal(usage)
+	}
+
+	argOut := args[1]
+	file := args[2]
+
+	_, err := os.Stat(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var names []string
-	paths := args["<path>"].([]string)
-	for _, p := range paths {
-		pi, err := os.Stat(p)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if !pi.IsDir() {
-			names = append(names, p)
-			continue
-		}
-
-		files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", p))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		names = append(names, files...)
-	}
-
-	content, err := ioutil.ReadFile("_example/asg.yaml")
+	content, err := ioutil.ReadFile(file)
 	doc := doc.Create(content)
 
 	var out string
 
 	switch {
-	case args["markdown"].(bool):
+	case argOut == "markdown":
 		out, err = print.Markdown(doc)
-	case args["md"].(bool):
+	case argOut == "md":
 		out, err = print.Markdown(doc)
-	//case args["json"].(bool):
-	//	out, err = print.JSON(doc)
+	case argOut == "json":
+		out, err = print.Pretty(doc)
 	default:
 		out, err = print.Pretty(doc)
 	}
