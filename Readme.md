@@ -1,9 +1,7 @@
 
-  `cf-docs(1)` &sdot; a quick utility to generate docs from Cloudformation templates.
+  `cf-doc(1)` &sdot; a quick utility to generate docs from Cloudformation templates.
 
   Inspired and "transformed" from [Segmentio Terraform](https://github.com/segmentio/terraform-docs)  
-
-<img width="1284" alt="screen shot 2016-06-14 at 5 38 37 pm" src="https://cloud.githubusercontent.com/assets/1661587/16049202/1ad63c16-3257-11e6-9e2c-6bb83e684ba4.png">
 
 
 ## Features
@@ -13,7 +11,7 @@
   - Generate JSON docs (for customizing presentation)
   - Generate markdown tables of inputs and outputs
 
-## Installation
+## Installation (Pending...)
 
   - `go get github.com/.....`
   - [Binaries](https://github.com/......)
@@ -24,19 +22,19 @@
 ```bash
 
   Usage:
-    cf-docs [json | md | markdown] <file>...
-    cf-docs -h | --help
+    cf-doc [json | md | markdown] <file>...
+    cf-doc -h | --help
 
   Examples:
 
     # View inputs and outputs
-    $ cf-docs my-template.yaml
+    $ cf-doc my-template.yaml
 
     # Generate a JSON of inputs and outputs
-    $ cf-docs my-template.yaml
+    $ cf-doc my-template.yaml
 
     # Generate markdown tables of inputs and outputs
-    $ cf-docs md my-template.yaml
+    $ cf-doc md my-template.yaml
 
     
   Options:
@@ -81,13 +79,13 @@ Outputs:
 To view docs:
 
 ```bash
-$ cf-docs _example/asg.yaml
+$ cf-doc json _example/asg.yaml
 ```
 
 To output JSON docs:
 
 ```bash
-$ cf-docs _example/asg.yaml
+$ cf-doc json _example/asg.yaml
 {
     "Usage": "AWS Cloudformation Template for AutoScalingGroups (ASG)\n\n  Template usage:\n \n       This template depends on the LC template and also the VPC stack.\n       This is a NON working template. only for demonstration purposes for cf-doc\n\n",
     "Parameters": [
@@ -119,13 +117,37 @@ $ cf-docs _example/asg.yaml
 To output markdown docs:
 
 ```bash
-$ cf-docs md _example/asg.yaml
+$ cf-doc md _example/asg.yaml
+
+AWS Cloudformation Template for AutoScalingGroups (ASG)
+
+  Template usage:
+
+       This template depends on the LC template and also the VPC stack.
+       This is a NON working template. only for demonstration purposes for cf-doc
+
+
+
+## Parameters
+
+| Name | Description | Type | Default | Allowed Values |
+|------|-------------|:----:|:-------:|:---------------|
+| pLaunchConfigurationName | Launch configuration name | String |  |  |
+| pVPCZoneIdentifier | Subnets List of VPC | CommaDelimitedList |  |  |
+
+## Outputs
+
+| Name | Description | Export |
+|------|-------------|--------|
+| asgid | AsgBase Logical ID | ${AWS::StackName}-asgid |
 
 ```
 
 ## License
 
 MIT License
+
+Copyright (c) 2017 Brahama
 
 Copyright (c) 2017 Segment, Inc
 
