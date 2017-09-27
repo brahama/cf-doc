@@ -5,7 +5,6 @@ go:
 before_install:
   - go vet ./...
   - go get github.com/mitchellh/gox
-  - gox -build-toolchain
 
 after_success:
   - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
