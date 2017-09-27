@@ -1,8 +1,6 @@
 language: go
 before_script:
   - go vet ./...
-
-install:
   - go get github.com/mitchellh/gox
 
 go:
