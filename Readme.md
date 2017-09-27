@@ -1,5 +1,5 @@
-
-  `cf-doc(1)` &sdot; a quick utility to generate docs from Cloudformation templates. [![Build Status](https://travis-ci.org/brahama/cf-doc.svg?branch=dev)](https://travis-ci.org/brahama/cf-doc)
+[![Build Status](https://travis-ci.org/brahama/cf-doc.svg?branch=dev)](https://travis-ci.org/brahama/cf-doc)
+  `cf-doc(1)` &sdot; a quick utility to generate docs from Cloudformation templates. 
 
   Inspired and "transformed" from [Segmentio Terraform](https://github.com/segmentio/terraform-docs)  
 
