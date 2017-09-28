@@ -1,7 +1,8 @@
 language: go
 go:
   - 1.9.x
-
+  - master
+  
 before_install:
   - go vet ./...
   - go get github.com/mitchellh/gox
