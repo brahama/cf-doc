@@ -46,3 +46,8 @@ Outputs:
     Value: !Ref 'asg'
     Export:
       Name: !Sub "${AWS::StackName}-asgid"
+  LogGroup:
+    Description: 'Log group of ECS cluster.'
+    Value: !Ref LogGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-LogGroup'
