@@ -119,6 +119,7 @@ func Create(cfTemplate []byte) *Doc {
 		cfDoc.Outputs[i].Name = k
 		cfDoc.Outputs[i].Description = cfOut.Outputs[k].Description
 		cfDoc.Outputs[i].Export = cfOut.Outputs[k].Export.Name
+		i++
 	}
 
 	return &cfDoc
