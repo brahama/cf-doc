@@ -1,12 +1,21 @@
 package doc
 
 import (
+	"io/ioutil"
+	"log"
 	"testing"
 )
 
-var content = []byte(yamlInputContent)
+func contentHelper(file string) *[]byte {
+	content, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	return &content
+}
 func TestCfDocUsage(t *testing.T) {
+	content := contentHelper("../_example/asg.yaml")
 	expected := `AWS Cloudformation Template for AutoScalingGroups (ASG)
 
   Template usage:
@@ -15,15 +24,16 @@ func TestCfDocUsage(t *testing.T) {
        This is a NON working template. only for demonstration purposes for cf-doc
 
 `
-	actual := Create(content).Usage
+	actual := Create(*content).Usage
 	if actual != expected {
 		t.Errorf("Test failed, got %s, expected %s", actual, expected)
 	}
 }
 
 func TestCfDocParams(t *testing.T) {
+	content := contentHelper("../_example/asg.yaml")
 	expected := `pLaunchConfigurationNameStringLaunch configuration namepVPCZoneIdentifierCommaDelimitedListSubnets List of VPC`
-	params := Create(content).Parameters
+	params := Create(*content).Parameters
 	var actual string
 	for k := range params {
 		actual += params[k].Name
@@ -38,8 +48,9 @@ func TestCfDocParams(t *testing.T) {
 }
 
 func TestCfDocOut(t *testing.T) {
-	expected := `asgidAsgBase Logical ID${AWS::StackName}-asgid`
-	outs := Create(content).Outputs
+	content := contentHelper("../_example/asg.yaml")
+	expected := `LogGroupLog group of ECS cluster.${AWS::StackName}-LogGroupasgidAsgBase Logical ID${AWS::StackName}-asgid`
+	outs := Create(*content).Outputs
 	var actual string
 	for k := range outs {
 		actual += outs[k].Name
@@ -50,52 +61,3 @@ func TestCfDocOut(t *testing.T) {
 		t.Errorf("Test failed, got %s, expected %s", actual, expected)
 	}
 }
-
-const yamlInputContent = `#
-#  Template usage:
-#
-#       This template depends on the LC template and also the VPC stack.
-#       This is a NON working template. only for demonstration purposes for cf-doc
-#
-
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'AWS Cloudformation Template for AutoScalingGroups (ASG)'
-# Testing Parameters
-Parameters:
-  pLaunchConfigurationName:
-    Type: String
-    Description: Launch configuration name
-  pVPCZoneIdentifier:
-    Type: CommaDelimitedList
-    Description: Subnets List of VPC
-
-Conditions:
-  LoadBalancerNamesNull: !Equals
-    - !Join
-      - ''
-      - !Ref pLoadBalancerNames
-    - ''
-
-Resources:
-  asg:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    Properties:
-      LaunchConfigurationName: !Ref 'pLaunchConfigurationName'
-      VPCZoneIdentifier: !Ref 'pVPCZoneIdentifier'
-      Cooldown: !Ref 'pCooldown'
-      MinSize: !Ref 'pMinSize'
-      MaxSize: !Ref 'pMaxSize'
-      DesiredCapacity: !Ref 'pDesiredCapacity'
-      HealthCheckGracePeriod: !Ref 'pHealthCheckGracePeriod'
-      HealthCheckType: !Ref 'pHealthCheckType'
-      Tags:
-      - Key: Name
-        Value: ''
-        PropagateAtLaunch: true
-
-Outputs:
-  asgid:
-    Description: AsgBase Logical ID
-    Value: !Ref 'asg'
-    Export:
-      Name: !Sub "${AWS::StackName}-asgid"`
