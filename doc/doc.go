@@ -8,6 +8,7 @@ package doc
 import (
 	"bufio"
 	"bytes"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -101,8 +102,14 @@ func Create(cfTemplate []byte) *Doc {
 	}
 
 	// Now we create and fill the Doc Parameters
-	i := 0
+	keys := make([]string, len(cfParam.Parameters))
 	for k := range cfParam.Parameters {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	i := 0
+	for _, k := range keys {
 		cfDoc.Parameters = append(cfDoc.Parameters, Parameter{})
 		cfDoc.Parameters[i].Name = k
 		cfDoc.Parameters[i].Type = cfParam.Parameters[k].Type
@@ -113,8 +120,13 @@ func Create(cfTemplate []byte) *Doc {
 	}
 
 	// Create Doc Outputs
-	i = 0
+	keys = make([]string, len(cfOut.Outputs))
 	for k := range cfOut.Outputs {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	i = 0
+	for _, k := range keys {
 		cfDoc.Outputs = append(cfDoc.Outputs, Output{})
 		cfDoc.Outputs[i].Name = k
 		cfDoc.Outputs[i].Description = cfOut.Outputs[k].Description
