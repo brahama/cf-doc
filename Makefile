@@ -10,7 +10,7 @@ VERSION     := $(shell cat ./VERSION)
 GOBUILD     := go build -ldflags "-X main.version=$(VERSION)"
 GOPKGS      := $(shell go list ./... | grep -v /vendor)
 
-TOKEN = $(shell cat .token)
+TOKEN = $(shell cat ~/.github.token)
 
 .PHONY: all
 all: clean deps test build
