@@ -19,9 +19,6 @@ const usage = `
 
   Examples:
 
-    # View inputs and outputs
-    $ cf-doc ./my-template.yaml
-
     # Generate a JSON of inputs and outputs
     $ cf-doc json ./my-template.yaml
 
@@ -56,7 +53,7 @@ func main() {
 
 	switch {
 	case argOut == "markdown":
-		out, err = print.Markdown(doc)
+		fallthrough
 	case argOut == "md":
 		out, err = print.Markdown(doc)
 	case argOut == "json":

@@ -20,7 +20,7 @@ func Markdown(d *doc.Doc) (string, error) {
 	var buf bytes.Buffer
 
 	if len(d.Usage) > 0 {
-		buf.WriteString(fmt.Sprintf("%s\n", d.Usage))
+		buf.WriteString(fmt.Sprintf("# %s\n", d.Usage))
 	}
 
 	if len(d.Parameters) > 0 {
