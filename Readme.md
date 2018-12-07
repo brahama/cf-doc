@@ -1,5 +1,17 @@
+## permanent fork
+This repo is a permanent fork of the original project.
+
+### Installation via brew
+```
+brew tap daniel-ciaglia/taps
+brew tap-pin daniel-ciaglia/taps
+brew install daniel-ciaglia/taps/cf-doc
+```
+See the [Homebrew documentation](https://docs.brew.sh/Taps) for more information on managing taps.
+
+
 [![Build Status](https://travis-ci.org/brahama/cf-doc.svg?branch=dev)](https://travis-ci.org/brahama/cf-doc)
-  `cf-doc(1)` &sdot; a quick utility to generate docs from Cloudformation templates. 
+  `cf-doc(1)` &sdot; a quick utility to generate docs from Cloudformation templates.
 
   Inspired and "transformed" from [Segmentio Terraform](https://github.com/segmentio/terraform-docs)  
 
@@ -36,7 +48,7 @@
     # Generate markdown tables of inputs and outputs
     $ cf-doc md my-template.yaml
 
-    
+
   Options:
     -h, --help     show help information
 
@@ -49,7 +61,7 @@ Given a simple template at `./_example/asg.yaml`:
 ```yaml
 #
 #  Template usage:
-# 
+#
 #       This template depends on the LC template and also the VPC stack.
 #       This is a NON working template. only for demonstration purposes for cf-doc
 #
