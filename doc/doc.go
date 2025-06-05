@@ -120,7 +120,7 @@ func Create(cfTemplate []byte) *Doc {
 	}
 
 	// Create Doc Outputs
-	keys = make([]string, len(cfOut.Outputs))
+	keys = make([]string, 0)
 	for k := range cfOut.Outputs {
 		keys = append(keys, k)
 	}
