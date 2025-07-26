@@ -1,10 +1,15 @@
 language: go
 go:
   - 1.9.x
-  
+branches:
+  only:
+  - master
+  - dev
+
 before_install:
   - go vet ./...
   - go get github.com/mitchellh/gox
 
 after_success:
-  - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
+  - test $TRAVIS_BRANCH = "dev" && gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" && ls
+
