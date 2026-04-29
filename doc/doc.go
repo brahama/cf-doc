@@ -102,7 +102,7 @@ func Create(cfTemplate []byte) *Doc {
 	}
 
 	// Now we create and fill the Doc Parameters
-	keys := make([]string, len(cfParam.Parameters))
+	keys := make([]string, 0, len(cfParam.Parameters))
 	for k := range cfParam.Parameters {
 		keys = append(keys, k)
 	}

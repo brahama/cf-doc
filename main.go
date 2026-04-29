@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/brahama/cf-doc/doc"
-	"github.com/brahama/cf-doc/print"
+	"github.com/brahma/cf-doc/doc"
+	"github.com/brahma/cf-doc/print"
 )
 
 var version = "v0.0.1"

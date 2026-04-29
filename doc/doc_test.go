@@ -47,6 +47,24 @@ func TestCfDocParams(t *testing.T) {
 	}
 }
 
+func TestCfDocParamsDoesNotCreateEmptyRows(t *testing.T) {
+	content := []byte(`Parameters:
+  Foo:
+    Type: String
+  Bar:
+    Type: Number
+`)
+
+	params := Create(content).Parameters
+	if len(params) != 2 {
+		t.Fatalf("expected 2 parameters, got %d", len(params))
+	}
+
+	if params[0].Name == "" || params[1].Name == "" {
+		t.Fatalf("expected parameter names to be populated, got %#v", params)
+	}
+}
+
 func TestCfDocOut(t *testing.T) {
 	content := contentHelper("../_example/asg.yaml")
 	expected := `LogGroupLog group of ECS cluster.${AWS::StackName}-LogGroupasgidAsgBase Logical ID${AWS::StackName}-asgid`

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/brahama/cf-doc/doc"
+	"github.com/brahma/cf-doc/doc"
 )
 
-//Pretty prints pretty json of Doc
+// Pretty prints pretty json of Doc
 func Pretty(d *doc.Doc) (string, error) {
 	j, err := json.MarshalIndent(d, "", "    ")
 
