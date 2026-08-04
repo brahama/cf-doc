@@ -10,6 +10,7 @@
   - Generate docs for inputs and outputs
   - Generate JSON docs (for customizing presentation)
   - Generate markdown tables of inputs and outputs
+  - Inject markdown docs into an existing Readme, in place
 
 ## Installation (Pending...)
 
@@ -23,6 +24,7 @@
 
   Usage:
     cf-doc [json | md | markdown] <file>...
+    cf-doc inject <file> --output-file <readme>
     cf-doc -h | --help
 
   Examples:
@@ -35,6 +37,9 @@
 
     # Generate markdown tables of inputs and outputs
     $ cf-doc md my-template.yaml
+
+    # Inject markdown docs into an existing Readme
+    $ cf-doc inject my-template.yaml --output-file Readme.md
 
     
   Options:
@@ -142,6 +147,30 @@ AWS Cloudformation Template for AutoScalingGroups (ASG)
 | asgid | AsgBase Logical ID | ${AWS::StackName}-asgid |
 
 ```
+
+## Injecting docs into a Readme
+
+Instead of generating a standalone doc, `cf-doc` can splice generated docs
+into an existing file (e.g. your project's `Readme.md`), leaving everything
+else in the file untouched. This works like `terraform-docs`' inject output
+mode: add a pair of marker comments to the file, and `cf-doc` will replace
+everything between them on each run.
+
+```markdown
+<!-- cf-doc:start -->
+<!-- cf-doc:end -->
+```
+
+Then run:
+
+```bash
+$ cf-doc inject _example/asg.yaml --output-file Readme.md
+```
+
+The region between `<!-- cf-doc:start -->` and `<!-- cf-doc:end -->` is
+replaced with the generated markdown tables; the markers themselves and the
+rest of the file are left as-is. Both markers must already exist in the
+target file — `cf-doc` will not create them for you.
 
 ## License
 
